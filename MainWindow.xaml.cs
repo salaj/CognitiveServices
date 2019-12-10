@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -15,10 +14,10 @@ namespace WPF_Application
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly RecognizeSpeechViewModel rsvm;
-        private readonly FaceViewModel fvm;
-        private readonly WebSearchViewModel wsvm;
-        private readonly SynthesizeTextViewModel stvm;
+        private readonly RecognizeSpeechViewModel recognizeSpeechViewModel;
+        private readonly FaceViewModel faceViewModel;
+        private readonly WebSearchViewModel webSearchViewModel;
+        private readonly SynthesizeTextViewModel synthesizeTextViewModel;
 
         private readonly string subscriptionKey;
         private readonly string region;
@@ -32,10 +31,10 @@ namespace WPF_Application
             region = ConfigurationManager.AppSettings["AzureRegion"];
             endpoint = string.Format(ConfigurationManager.AppSettings["AzureCognitiveServiceEndpoint"], region);
 
-            rsvm = new RecognizeSpeechViewModel(subscriptionKey, region);
-            wsvm = new WebSearchViewModel(subscriptionKey, endpoint);
-            fvm = new FaceViewModel(subscriptionKey, endpoint);
-            stvm = new SynthesizeTextViewModel(subscriptionKey, region);
+            recognizeSpeechViewModel = new RecognizeSpeechViewModel(subscriptionKey, region, MySpeechResponse, SupportedLanguages, MySpeechResponseFromFile, searchImageText);
+            webSearchViewModel = new WebSearchViewModel(subscriptionKey, endpoint, searchImage, searchImageText);
+            faceViewModel = new FaceViewModel(subscriptionKey, endpoint, MySpeechResponseFromFile, LoadingBar, searchImage, searchImageText);
+            synthesizeTextViewModel = new SynthesizeTextViewModel(subscriptionKey, region, MyFaceEmotionReponse, SupportedLanguages);
 
         }
 
@@ -44,13 +43,13 @@ namespace WPF_Application
 
         private async void button_FromFile_Click(object sender, RoutedEventArgs e)
         {
-            var result = await rsvm.RecognizeFromFile(MySpeechResponseFromFile, SupportedLanguages);
-            rsvm.handleOutput(result, this.MySpeechResponseFromFile, searchImageText);
+            var result = await recognizeSpeechViewModel.RecognizeFromFile();
+            recognizeSpeechViewModel.HandleResultFromFile(result);
         }
 
         private async void button_FromFile_REST_Click(object sender, RoutedEventArgs e)
         {
-            var result = rsvm.recognizeSpeech.RecognizeSpeechFromFileRESTApi(SupportedLanguages.Text);
+            var result = recognizeSpeechViewModel.recognizeSpeech.RecognizeSpeechFromFileRESTApi(SupportedLanguages.Text);
 
             if (result["RecognitionStatus"].ToString() == "Success")
             {
@@ -63,7 +62,7 @@ namespace WPF_Application
                     this.searchImage.Visibility = Visibility.Collapsed;
                 });
 
-                await wsvm.ProcessWebSearchREST(result["NBest"][0]["Display"].ToString(), searchImage, searchImageText);
+                await webSearchViewModel.ProcessWebSearchREST(result["NBest"][0]["Display"].ToString());
 
                 await RunOnUIThread(() =>
                 {
@@ -75,27 +74,9 @@ namespace WPF_Application
 
         private async void button_Click(object sender, RoutedEventArgs e)
         {
-            var result = await rsvm.RecognizeFromString(MySpeechResponse, SupportedLanguages);
-            var recognized = rsvm.handleOutput(result, this.MySpeechResponse, this.searchImageText);
-            if (recognized)
-            {
-                await RunOnUIThread(() => this.LoadingBar.Visibility = Visibility.Visible);
-                var intent = await new LUIS.LUIS(subscriptionKey, endpoint).GetLuisIntent(result.Text);
-                await RunOnUIThread(() =>
-                {
-                    this.MySpeechIntent.Text = $"Intent: '{intent.prediction.topIntent}',";
-                    this.MySpeechIntentScore.Text = $"score: {intent.prediction.topScore:0.##}";
-                });
-                await wsvm.ProcessWebSearch(result.Text, searchImage, searchImageText);
-                if (intent.prediction.topIntent == "PeoplePictures")
-                {
-                    await fvm.DetectFaces(MyFaceResponse, LoadingBar, searchImage, searchImageText);
-                }
-                await RunOnUIThread(() => this.LoadingBar.Visibility = Visibility.Collapsed);
-            }
+            var result = await recognizeSpeechViewModel.RecognizeFromMicrophoneInput();
+            var recognized = recognizeSpeechViewModel.HandleResultFromMic(result);
         }
-
-
 
         private async void button_Face_FromFile_Click(object sender, RoutedEventArgs e)
         {
@@ -107,23 +88,65 @@ namespace WPF_Application
             {
                 this.searchImage.Source = bitmapSource;
             });
-            await fvm.DetectFaces(MyFaceResponse, LoadingBar, searchImage, searchImageText);
+            await faceViewModel.DetectFacesInThePicture();
         }
 
-       
-        private void FacePhoto_MouseMove(object sender, MouseEventArgs e)
+        private async void FacePhoto_MouseMove(object sender, MouseEventArgs e)
         {
             // Find the mouse position relative to the image.
             Point mouseXY = e.GetPosition(searchImage);
-            var detectedFace = fvm.GetFacesDescription(searchImage, searchImageText, mouseXY);
+            var detectedFace = faceViewModel.GetFacesDescription(mouseXY);
 
             if (detectedFace != null)
             {
-                var highestEmotion = fvm.GetHighestEmotion(detectedFace);
+                var highestEmotion = faceViewModel.GetHighestEmotion(detectedFace);
                 var textToSynthesize =
                     $"I'm  {Convert.ToInt16(highestEmotion.maxConfidence * 100)}% sure that this person's emotion is {highestEmotion.maxConfidenceEmotionName}";
-                MyFaceEmotionReponse.Text = textToSynthesize;
-                Task.Run(()=>stvm.SynthesisToSpeakerAsync(SupportedLanguages.Text, textToSynthesize));
+                await RunOnUIThread(() => MyFaceEmotionReponse.Text = textToSynthesize);
+                var supportedLanguages = SupportedLanguages.Text;
+                await Task.Run(()=>synthesizeTextViewModel.SynthesisToSpeakerAsync(supportedLanguages, textToSynthesize));
+            }
+        }
+
+        private async void button_Synthesize_Click(object sender, RoutedEventArgs e)
+        {
+            var supportedLanguages = SupportedLanguages.Text;
+            var textToSynthesize = TextSynthesize.Text;
+            await Task.Run(() => synthesizeTextViewModel.SynthesisToSpeakerAsync(supportedLanguages, textToSynthesize));
+        }
+
+        private async void button_Full_Click(object sender, RoutedEventArgs e)
+        {
+            // STEP 1 - RECOGNIZE SPEECH FROM MICROPHONE INPUT
+            var result = await recognizeSpeechViewModel.RecognizeFromMicrophoneInput();
+            var recognized = recognizeSpeechViewModel.HandleResultFromMic(result);
+            if (recognized)
+            {
+                await RunOnUIThread(() => this.LoadingBar.Visibility = Visibility.Visible);
+                // STEP 2 - GET INTENT BASED ON RECOGNIZED TEXT 
+                var intent = await new LUIS.LUIS(subscriptionKey, endpoint).GetLuisIntent(result.Text);
+                await RunOnUIThread(() =>
+                {
+                    this.MySpeechIntent.Text = $"Intent: '{intent.prediction.topIntent}',";
+                    this.MySpeechIntentScore.Text = $"score: {intent.prediction.topScore:0.##}";
+                });
+                // STEP 3 - FIND IMAGE BASED ON RECOGNIZED TEXT
+                await webSearchViewModel.ProcessWebSearchREST(result.Text);
+                if (intent.prediction.topIntent == "PeoplePictures")
+                {
+                    // STEP 4 - DETECT FACES IF THERE ARE PEOPLE IN PICTURE 
+                    await faceViewModel.DetectFacesInThePicture();
+
+                    // STEP 5 - READ LOUD HIGHEST SCORED EMOTION
+                    var highestEmotion = faceViewModel.GetHighestEmotionForAnyDetectedFace();
+                    await synthesizeTextViewModel.ReadHighestEmotion(highestEmotion);
+                }
+                else
+                {
+                    faceViewModel.faceList = null;
+                    await RunOnUIThread(() => this.MyFaceEmotionReponse.Text = string.Empty);
+                }
+                await RunOnUIThread(() => this.LoadingBar.Visibility = Visibility.Collapsed);
             }
         }
     }

@@ -23,9 +23,8 @@ namespace FaceAPI
         }
 
 
-        public async Task<IList<DetectedFace>> DetectFaces()
+        public async Task<IList<DetectedFace>> DetectFaces(Stream imageFileStream)
         {
-
             IFaceClient faceClient = new FaceClient(new ApiKeyServiceClientCredentials(subscriptionKey));
             faceClient.Endpoint = faceEndpoint;
 
@@ -41,15 +40,16 @@ namespace FaceAPI
             // Call the Face API.
             try
             {
-                using (Stream imageFileStream = File.OpenRead(imageFilePath))
-                {
-                    // The second argument specifies to return the faceId, while
-                    // the third argument specifies not to return face landmarks.
-                    IList<DetectedFace> faceList =
-                        await faceClient.Face.DetectWithStreamAsync(
-                            imageFileStream, true, false, faceAttributes);
+                //using (Stream i = File.OpenRead(imageFilePath))
+                //{
+                    //The second argument specifies to return the faceId, while
+
+                    //the third argument specifies not to return face landmarks.
+                   IList<DetectedFace> faceList =
+                       await faceClient.Face.DetectWithStreamAsync(
+                           imageFileStream, true, false, faceAttributes);
                     return faceList;
-                }
+                //}
             }
             // Catch and display Face API errors.
             catch (APIErrorException f)

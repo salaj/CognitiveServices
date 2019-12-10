@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,15 +26,25 @@ namespace WPF_Application
 
         public FaceAPI.FaceAPI faceAPI;
 
+
+        private TextBlock MyFaceResponseFromFile;
+        private StackPanel LoadingBar;
+        private Image searchImage;
+        private TextBlock searchImageText;
+
         DispatcherOperation RunOnUIThread(Action action) => Application.Current.Dispatcher.BeginInvoke(
             DispatcherPriority.Normal, action);
 
-        public FaceViewModel(string subscriptionKey, string endpoint)
+        public FaceViewModel(string subscriptionKey, string endpoint, TextBlock myFaceResponseFromFile, StackPanel loadingBar, Image searchImage, TextBlock searchImageText)
         {
+            MyFaceResponseFromFile = myFaceResponseFromFile;
+            LoadingBar = loadingBar;
+            this.searchImage = searchImage;
+            this.searchImageText = searchImageText;
             faceAPI = new FaceAPI.FaceAPI(subscriptionKey, endpoint);
         }
 
-        private void DrawRectangels(Image searchImage, TextBlock searchImageText)
+        private void DrawRectangels()
         {
             var bitmapSource = searchImage.Source as BitmapSource;
             if (faceList.Count > 0)
@@ -87,18 +97,20 @@ namespace WPF_Application
             }
         }
 
-        public async Task DetectFaces(TextBlock MyFaceResponseFromFile, StackPanel LoadingBar, Image searchImage, TextBlock searchImageText)
+        public async Task DetectFacesInThePicture()
         {
             await RunOnUIThread(() =>
             {
                 MyFaceResponseFromFile.Text = "Recognizing...";
                 LoadingBar.Visibility = Visibility.Visible;
             });
-
-            faceList = await faceAPI.DetectFaces();
+            var bitmapImage = searchImage.Source as BitmapImage;
+            WebClient client = new WebClient();
+            using (var stream = client.OpenRead(bitmapImage.UriSource))
+                faceList = await faceAPI.DetectFaces(stream);
             await RunOnUIThread(() =>
             {
-                DrawRectangels(searchImage, searchImageText);
+                DrawRectangels();
                 MyFaceResponseFromFile.Text = $"Detection Finished. {faceList.Count} face(s) detected";
                 LoadingBar.Visibility = Visibility.Collapsed;
             });
@@ -158,7 +170,7 @@ namespace WPF_Application
             return sb.ToString();
         }
 
-        public DetectedFace GetFacesDescription(Image searchImage, TextBlock searchImageText, Point mouseXY)
+        public DetectedFace GetFacesDescription(Point mouseXY)
         {
             // If the REST call has not completed, return.
             if (faceList == null)
@@ -200,6 +212,15 @@ namespace WPF_Application
         public FaceAPI.FaceAPI.HighestEmotion GetHighestEmotion(DetectedFace face)
         {
             return faceAPI.GetHighestEmotion(face);
+        }
+
+        public FaceAPI.FaceAPI.HighestEmotion GetHighestEmotionForAnyDetectedFace()
+        {
+            if (faceList != null)
+            {
+                return faceAPI.GetHighestEmotion(faceList.First());
+            }
+            return null;
         }
     }
 }

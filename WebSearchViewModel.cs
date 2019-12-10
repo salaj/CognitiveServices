@@ -17,17 +17,22 @@ namespace WPF_Application
 
         private WebSearch webSearch;
 
-        public WebSearchViewModel(string subscriptionKey, string endpoint)
+        private Image searchImage;
+        private TextBlock searchImageText;
+
+        public WebSearchViewModel(string subscriptionKey, string endpoint, Image searchImage, TextBlock searchImageText)
         {
+            this.searchImage = searchImage;
+            this.searchImageText = searchImageText;
             this.webSearch = new WebSearch(subscriptionKey, endpoint);
         }
 
-        public async Task ProcessWebSearchREST(string phrase, Image searchImage, TextBlock searchImageText)
+        public async Task ProcessWebSearchREST(string phrase)
         {
-            var result = await webSearch.SearchImage(phrase);
-            var json = JObject.Parse(result.jsonResult);
             try
             {
+                var result = await webSearch.SearchImage(phrase);
+                var json = JObject.Parse(result.jsonResult);
                 var firstJsonObj = json["value"][0];
                 var firstJsonObjUrl = firstJsonObj["contentUrl"];
                 var uriSource = new Uri(firstJsonObjUrl.ToString());
@@ -40,7 +45,7 @@ namespace WPF_Application
             }
         }
 
-        public async Task ProcessWebSearch(string phrase, Image searchImage, TextBlock searchImageText)
+        public async Task ProcessWebSearch(string phrase)
         {
             var webData = await webSearch.WebResults(phrase);
 
