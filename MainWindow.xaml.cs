@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Microsoft.CognitiveServices.Speech;
 
 namespace WPF_Application
 {
@@ -118,8 +119,8 @@ namespace WPF_Application
         private async void button_Full_Click(object sender, RoutedEventArgs e)
         {
             // STEP 1 - RECOGNIZE SPEECH FROM MICROPHONE INPUT
-            var result = await recognizeSpeechViewModel.RecognizeFromMicrophoneInput();
-            var recognized = recognizeSpeechViewModel.HandleResultFromMic(result);
+            SpeechRecognitionResult result = null;
+            var recognized = false;
             if (recognized)
             {
                 await RunOnUIThread(() => this.LoadingBar.Visibility = Visibility.Visible);
@@ -131,15 +132,15 @@ namespace WPF_Application
                     this.MySpeechIntentScore.Text = $"score: {intent.prediction.topScore:0.##}";
                 });
                 // STEP 3 - FIND IMAGE BASED ON RECOGNIZED TEXT
-                await webSearchViewModel.ProcessWebSearchREST(result.Text);
+                
                 if (intent.prediction.topIntent == "PeoplePictures")
                 {
                     // STEP 4 - DETECT FACES IF THERE ARE PEOPLE IN PICTURE 
-                    await faceViewModel.DetectFacesInThePicture();
+                    
 
                     // STEP 5 - READ LOUD HIGHEST SCORED EMOTION
-                    var highestEmotion = faceViewModel.GetHighestEmotionForAnyDetectedFace();
-                    await synthesizeTextViewModel.ReadHighestEmotion(highestEmotion);
+                    FaceAPI.FaceAPI.HighestEmotion highestEmotion = null;
+
                 }
                 else
                 {
