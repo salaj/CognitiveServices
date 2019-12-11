@@ -107,7 +107,15 @@ namespace WPF_Application
             var bitmapImage = searchImage.Source as BitmapImage;
             WebClient client = new WebClient();
             using (var stream = client.OpenRead(bitmapImage.UriSource))
-                faceList = await faceAPI.DetectFaces(stream);
+                try
+                {
+                    faceList = await faceAPI.DetectFaces(stream);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"There has been exception: {e.Message}");
+                }
+
             await RunOnUIThread(() =>
             {
                 DrawRectangels();
@@ -216,7 +224,7 @@ namespace WPF_Application
 
         public FaceAPI.FaceAPI.HighestEmotion GetHighestEmotionForAnyDetectedFace()
         {
-            if (faceList != null)
+            if (faceList != null && faceList.Any())
             {
                 return faceAPI.GetHighestEmotion(faceList.First());
             }

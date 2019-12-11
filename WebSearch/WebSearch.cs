@@ -21,10 +21,12 @@ namespace MyWebSearch
 
         public async Task<SearchResponse> WebResults(string phrase)
         {
+            IList<string> promoteAnswertypeStrings = new List<string>() { "images" };
             var client = new WebSearchClient(new ApiKeyServiceClientCredentials(subscriptionKey));
+            client.Endpoint = endpoint;
             try
             {
-                var webData = await client.Web.SearchAsync(query: phrase);
+                var webData = await client.Web.SearchAsync(query: phrase, answerCount:2, promote: promoteAnswertypeStrings);
                 return webData;
             }
             catch (Exception ex)

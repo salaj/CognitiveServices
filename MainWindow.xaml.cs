@@ -62,7 +62,6 @@ namespace WPF_Application
                     this.LoadingBar.Visibility = Visibility.Visible;
                     this.searchImage.Visibility = Visibility.Collapsed;
                 });
-
                 await webSearchViewModel.ProcessWebSearchREST(result["NBest"][0]["Display"].ToString());
 
                 await RunOnUIThread(() =>
@@ -137,7 +136,6 @@ namespace WPF_Application
                 {
                     // STEP 4 - DETECT FACES IF THERE ARE PEOPLE IN PICTURE 
                     
-
                     // STEP 5 - READ LOUD HIGHEST SCORED EMOTION
                     FaceAPI.FaceAPI.HighestEmotion highestEmotion = null;
 
