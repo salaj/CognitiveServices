@@ -48,7 +48,6 @@ namespace WPF_Application
         private async void button_FromFile_Click(object sender, RoutedEventArgs e)
         {
             var result = await recognizeSpeechViewModel.RecognizeFromFile(audioFilePath);
-            recognizeSpeechViewModel.HandleResultFromFile(result);
         }
 
         private async void button_FromFile_REST_Click(object sender, RoutedEventArgs e)
@@ -78,7 +77,6 @@ namespace WPF_Application
         private async void button_Click(object sender, RoutedEventArgs e)
         {
             var result = await recognizeSpeechViewModel.RecognizeFromMicrophoneInput();
-            var recognized = recognizeSpeechViewModel.HandleResultFromMic(result);
         }
 
         private async void button_Face_FromFile_Click(object sender, RoutedEventArgs e)
@@ -122,8 +120,7 @@ namespace WPF_Application
         {
             // STEP 1 - RECOGNIZE SPEECH FROM MICROPHONE INPUT OR FILE
             SpeechRecognitionResult result = null;
-            var recognized = false;
-            if (recognized)
+            if (result != null)
             {
                 await RunOnUIThread(() => this.LoadingBar.Visibility = Visibility.Visible);
                 // STEP 2 - GET INTENT BASED ON RECOGNIZED TEXT 

@@ -35,6 +35,9 @@ namespace WPF_Application
             await RunOnUIThread(() => MySpeechResponse.Text = "Listening...");
 
             var result = await recognizeSpeech.RecognizeSpeechAsync(SupportedLanguages.Text);
+
+            HandleResult(result, MySpeechResponse);
+
             return result;
         }
 
@@ -43,6 +46,9 @@ namespace WPF_Application
             await RunOnUIThread(() => MySpeechResponseFromFile.Text = "Recognizing...");
 
             var result = await recognizeSpeech.RecognizeSpeechAsyncFromFile(SupportedLanguages.Text, fileName);
+
+            HandleResult(result, MySpeechResponseFromFile);
+
             return result;
         }
 
@@ -52,12 +58,8 @@ namespace WPF_Application
             await RunOnUIThread(() => MySpeechResponseFromFile.Text = "Recognizing...");
 
             var result = await recognizeSpeech.RecognizeSpeechFromFileRESTApi(SupportedLanguages.Text, fileName);
-            return result;
-        }
 
-        public bool HandleResultFromMic(SpeechRecognitionResult result)
-        {
-            return HandleResult(result, MySpeechResponse);
+            return result;
         }
 
         public bool HandleResultFromFile(SpeechRecognitionResult result)
