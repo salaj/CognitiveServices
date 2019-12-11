@@ -15,6 +15,7 @@ namespace STT
         private string region;
 
         private string audioFilePath = @"whatstheweatherlike.wav";
+        private string audioFilePathPerson = @"Person.wav";
 
         public RecognizeSpeech(string subscriptionKey, string region)
         {
@@ -34,7 +35,7 @@ namespace STT
 
         public async Task<SpeechRecognitionResult> RecognizeSpeechAsyncFromFile(string speechRecognitionLanguage)
         {
-            using (var audioInput = AudioConfig.FromWavFileInput(audioFilePath))
+            using (var audioInput = AudioConfig.FromWavFileInput(audioFilePathPerson))
             {
                 using (var recognizer = new SpeechRecognizer(getSpeechConfig(speechRecognitionLanguage), audioInput))
                 {
@@ -58,7 +59,7 @@ namespace STT
             request.Headers["Ocp-Apim-Subscription-Key"] = subscriptionKey;
             request.AllowWriteStreamBuffering = false;
 
-            using (var fs = new FileStream(audioFilePath, FileMode.Open, FileAccess.Read))
+            using (var fs = new FileStream(audioFilePathPerson, FileMode.Open, FileAccess.Read))
             {
                 /*
                 * Open a request stream and write 1024 byte chunks in the stream one at a time.
