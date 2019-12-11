@@ -24,6 +24,9 @@ namespace WPF_Application
         private readonly string region;
         private readonly string endpoint;
 
+        private string audioFilePath = @"whatstheweatherlike.wav";
+        private string audioFilePathPerson = @"Person.wav";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -44,13 +47,13 @@ namespace WPF_Application
 
         private async void button_FromFile_Click(object sender, RoutedEventArgs e)
         {
-            var result = await recognizeSpeechViewModel.RecognizeFromFile();
+            var result = await recognizeSpeechViewModel.RecognizeFromFile(audioFilePath);
             recognizeSpeechViewModel.HandleResultFromFile(result);
         }
 
         private async void button_FromFile_REST_Click(object sender, RoutedEventArgs e)
         {
-            var result = recognizeSpeechViewModel.recognizeSpeech.RecognizeSpeechFromFileRESTApi(SupportedLanguages.Text);
+            var result = await recognizeSpeechViewModel.RecognizeSpeechFromFileRESTApi(audioFilePath);
 
             if (result["RecognitionStatus"].ToString() == "Success")
             {
@@ -117,7 +120,7 @@ namespace WPF_Application
 
         private async void button_Full_Click(object sender, RoutedEventArgs e)
         {
-            // STEP 1 - RECOGNIZE SPEECH FROM MICROPHONE INPUT
+            // STEP 1 - RECOGNIZE SPEECH FROM MICROPHONE INPUT OR FILE
             SpeechRecognitionResult result = null;
             var recognized = false;
             if (recognized)

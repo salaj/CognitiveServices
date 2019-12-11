@@ -14,8 +14,6 @@ namespace STT
         private string subscriptionKey;
         private string region;
 
-        private string audioFilePath = @"whatstheweatherlike.wav";
-        private string audioFilePathPerson = @"Person.wav";
 
         public RecognizeSpeech(string subscriptionKey, string region)
         {
@@ -33,9 +31,9 @@ namespace STT
             }
         }
 
-        public async Task<SpeechRecognitionResult> RecognizeSpeechAsyncFromFile(string speechRecognitionLanguage)
+        public async Task<SpeechRecognitionResult> RecognizeSpeechAsyncFromFile(string speechRecognitionLanguage, string audioFilePath)
         {
-            using (var audioInput = AudioConfig.FromWavFileInput(audioFilePathPerson))
+            using (var audioInput = AudioConfig.FromWavFileInput(audioFilePath))
             {
                 using (var recognizer = new SpeechRecognizer(getSpeechConfig(speechRecognitionLanguage), audioInput))
                 {
@@ -46,7 +44,7 @@ namespace STT
             }
         }
         
-        public JObject RecognizeSpeechFromFileRESTApi(string speechRecognitionLanguage)
+        public async Task<JObject> RecognizeSpeechFromFileRESTApi(string speechRecognitionLanguage, string audioFilePath)
         {
             HttpWebRequest request = null;
             request = (HttpWebRequest)HttpWebRequest.Create($"https://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language={speechRecognitionLanguage}&format=detailed");
@@ -59,7 +57,7 @@ namespace STT
             request.Headers["Ocp-Apim-Subscription-Key"] = subscriptionKey;
             request.AllowWriteStreamBuffering = false;
 
-            using (var fs = new FileStream(audioFilePathPerson, FileMode.Open, FileAccess.Read))
+            using (var fs = new FileStream(audioFilePath, FileMode.Open, FileAccess.Read))
             {
                 /*
                 * Open a request stream and write 1024 byte chunks in the stream one at a time.
@@ -81,7 +79,7 @@ namespace STT
                     requestStream.Flush();
                 }
 
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                var response = await request.GetResponseAsync();
                 var encoding = ASCIIEncoding.ASCII;
                 using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                 {

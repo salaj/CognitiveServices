@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Microsoft.CognitiveServices.Speech;
+using Newtonsoft.Json.Linq;
 using STT;
 
 namespace WPF_Application
@@ -37,11 +38,20 @@ namespace WPF_Application
             return result;
         }
 
-        public async Task<SpeechRecognitionResult> RecognizeFromFile()
+        public async Task<SpeechRecognitionResult> RecognizeFromFile(string fileName)
         {
             await RunOnUIThread(() => MySpeechResponseFromFile.Text = "Recognizing...");
 
-            var result = await recognizeSpeech.RecognizeSpeechAsyncFromFile(SupportedLanguages.Text);
+            var result = await recognizeSpeech.RecognizeSpeechAsyncFromFile(SupportedLanguages.Text, fileName);
+            return result;
+        }
+
+
+        public async Task<JObject> RecognizeSpeechFromFileRESTApi(string fileName)
+        {
+            await RunOnUIThread(() => MySpeechResponseFromFile.Text = "Recognizing...");
+
+            var result = await recognizeSpeech.RecognizeSpeechFromFileRESTApi(SupportedLanguages.Text, fileName);
             return result;
         }
 
