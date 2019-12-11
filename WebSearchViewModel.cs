@@ -45,9 +45,9 @@ namespace WPF_Application
             }
         }
 
-        public async Task ProcessWebSearch(string phrase)
+        public async Task SearchAsync(string phrase)
         {
-            var webData = await webSearch.WebResults(phrase);
+            var webData = await webSearch.SearchAsync(phrase);
 
             if (webData?.Images?.Value?.Count > 0)
             {

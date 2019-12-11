@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.CognitiveServices.Speech;
 
 namespace WPF_Application
@@ -47,7 +51,7 @@ namespace WPF_Application
 
         private async void button_FromFile_Click(object sender, RoutedEventArgs e)
         {
-            var result = await recognizeSpeechViewModel.RecognizeFromFile(audioFilePath);
+            var result = await recognizeSpeechViewModel.RecognizeSpeechAsyncFromFile(audioFilePath);
         }
 
         private async void button_FromFile_REST_Click(object sender, RoutedEventArgs e)
@@ -89,7 +93,7 @@ namespace WPF_Application
             {
                 this.searchImage.Source = bitmapSource;
             });
-            await faceViewModel.DetectFacesInThePicture();
+            await faceViewModel.DetectFaces();
         }
 
         private async void FacePhoto_MouseMove(object sender, MouseEventArgs e)
@@ -105,7 +109,7 @@ namespace WPF_Application
                     $"I'm  {Convert.ToInt16(highestEmotion.maxConfidence * 100)}% sure that this person's emotion is {highestEmotion.maxConfidenceEmotionName}";
                 await RunOnUIThread(() => MyFaceEmotionReponse.Text = textToSynthesize);
                 var supportedLanguages = SupportedLanguages.Text;
-                await Task.Run(()=>synthesizeTextViewModel.SynthesisToSpeakerAsync(supportedLanguages, textToSynthesize));
+                await Task.Run(()=>synthesizeTextViewModel.SpeakTextAsync(supportedLanguages, textToSynthesize));
             }
         }
 
@@ -113,7 +117,7 @@ namespace WPF_Application
         {
             var supportedLanguages = SupportedLanguages.Text;
             var textToSynthesize = TextSynthesize.Text;
-            await Task.Run(() => synthesizeTextViewModel.SynthesisToSpeakerAsync(supportedLanguages, textToSynthesize));
+            await Task.Run(() => synthesizeTextViewModel.SpeakTextAsync(supportedLanguages, textToSynthesize));
         }
 
         private async void button_Full_Click(object sender, RoutedEventArgs e)
@@ -135,10 +139,13 @@ namespace WPF_Application
                 if (intent.prediction.topIntent == "PeoplePictures")
                 {
                     // STEP 4 - DETECT FACES IF THERE ARE PEOPLE IN PICTURE 
-                    
-                    // STEP 5 - READ LOUD HIGHEST SCORED EMOTION
-                    FaceAPI.FaceAPI.HighestEmotion highestEmotion = null;
+                    IList<DetectedFace> detectedFaces = null;
+                    if (detectedFaces.Any())
+                    {
+                        FaceAPI.FaceAPI.HighestEmotion highestEmotion = null;
+                        // STEP 5 - READ LOUD HIGHEST SCORED EMOTION
 
+                    }
                 }
                 else
                 {

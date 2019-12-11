@@ -21,7 +21,7 @@ namespace STT
             this.region = region;
         }
 
-        public async Task<SpeechRecognitionResult> RecognizeSpeechAsync(string speechRecognitionLanguage)
+        public async Task<SpeechRecognitionResult> RecognizeOnceAsync(string speechRecognitionLanguage)
         {
             using (var recognizer = new SpeechRecognizer(getSpeechConfig(speechRecognitionLanguage)))
             {
@@ -31,7 +31,7 @@ namespace STT
             }
         }
 
-        public async Task<SpeechRecognitionResult> RecognizeSpeechAsyncFromFile(string speechRecognitionLanguage, string audioFilePath)
+        public async Task<SpeechRecognitionResult> RecognizeOnceAsyncFromFile(string speechRecognitionLanguage, string audioFilePath)
         {
             using (var audioInput = AudioConfig.FromWavFileInput(audioFilePath))
             {
@@ -44,7 +44,7 @@ namespace STT
             }
         }
         
-        public async Task<JObject> RecognizeSpeechFromFileRESTApi(string speechRecognitionLanguage, string audioFilePath)
+        public async Task<JObject> RecognizeOnceAsyncFromFileRESTApi(string speechRecognitionLanguage, string audioFilePath)
         {
             HttpWebRequest request = null;
             request = (HttpWebRequest)HttpWebRequest.Create($"https://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language={speechRecognitionLanguage}&format=detailed");

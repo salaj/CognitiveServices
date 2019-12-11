@@ -28,13 +28,13 @@ namespace WPF_Application
 
         private static object locker = new object();
 
-        public void SynthesisToSpeakerAsync(string speechLanguage, string textToSynthesize)
+        public void SpeakTextAsync(string speechLanguage, string textToSynthesize)
         {
             if (Monitor.TryEnter(locker))
             {
                 try
                 {
-                    var result = speechToText.SynthesisToSpeakerAsync(speechLanguage, textToSynthesize).Result;
+                    var result = speechToText.SpeakTextAsync(speechLanguage, textToSynthesize).Result;
 
                     if (result.Reason == ResultReason.SynthesizingAudioCompleted)
                     {
@@ -66,7 +66,7 @@ namespace WPF_Application
                 $"I'm  {Convert.ToInt16(highestEmotion.maxConfidence * 100)}% sure that this person's emotion is {highestEmotion.maxConfidenceEmotionName}";
             await RunOnUIThread(() => MyFaceEmotionReponse.Text = textToSynthesize);
             var supportedLanguages = SupportedLanguages.Text;
-            await Task.Run(() => SynthesisToSpeakerAsync(supportedLanguages, textToSynthesize));
+            await Task.Run(() => SpeakTextAsync(supportedLanguages, textToSynthesize));
         }
     }
 }

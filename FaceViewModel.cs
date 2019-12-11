@@ -97,8 +97,11 @@ namespace WPF_Application
             }
         }
 
-        public async Task DetectFacesInThePicture()
+        public async Task<IList<DetectedFace>> DetectFaces()
         {
+            //no picture to detect face
+            if (searchImage.Source == null)
+                return null;
             await RunOnUIThread(() =>
             {
                 MyFaceResponseFromFile.Text = "Recognizing...";
@@ -109,7 +112,7 @@ namespace WPF_Application
             using (var stream = client.OpenRead(bitmapImage.UriSource))
                 try
                 {
-                    faceList = await faceAPI.DetectFaces(stream);
+                    faceList = await faceAPI.DetectWithStreamAsync(stream);
                 }
                 catch (Exception e)
                 {
@@ -122,6 +125,7 @@ namespace WPF_Application
                 MyFaceResponseFromFile.Text = $"Detection Finished. {faceList.Count} face(s) detected";
                 LoadingBar.Visibility = Visibility.Collapsed;
             });
+            return faceList;
         }
 
         // Creates a string out of the attributes describing the face.

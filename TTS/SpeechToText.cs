@@ -15,7 +15,7 @@ namespace TTS
             this.region = region;
         }
 
-        public async Task<SpeechSynthesisResult> SynthesisToSpeakerAsync(string speechLanguage, string textToSynthesize)
+        public async Task<SpeechSynthesisResult> SpeakTextAsync(string speechLanguage, string textToSynthesize)
         {
             // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(getSpeechConfig(speechLanguage)))

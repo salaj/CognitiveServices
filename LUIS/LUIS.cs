@@ -7,7 +7,7 @@ namespace LUIS
 {
     public class LUIS
     {
-        private string appId = "7365609c-3538-44c4-9d83-8211bb58d269";
+        private string appId = "982ca464-c7da-4591-8212-01ff046a5601";
         private string endpoint;
         private string subscriptionKey;
 

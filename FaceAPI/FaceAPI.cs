@@ -23,7 +23,7 @@ namespace FaceAPI
         }
 
 
-        public async Task<IList<DetectedFace>> DetectFaces(Stream imageFileStream)
+        public async Task<IList<DetectedFace>> DetectWithStreamAsync(Stream imageFileStream)
         {
             IFaceClient faceClient = new FaceClient(new ApiKeyServiceClientCredentials(subscriptionKey));
             faceClient.Endpoint = faceEndpoint;

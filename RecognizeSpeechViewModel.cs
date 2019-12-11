@@ -34,18 +34,18 @@ namespace WPF_Application
         {
             await RunOnUIThread(() => MySpeechResponse.Text = "Listening...");
 
-            var result = await recognizeSpeech.RecognizeSpeechAsync(SupportedLanguages.Text);
+            var result = await recognizeSpeech.RecognizeOnceAsync(SupportedLanguages.Text);
 
             HandleResult(result, MySpeechResponse);
 
             return result;
         }
 
-        public async Task<SpeechRecognitionResult> RecognizeFromFile(string fileName)
+        public async Task<SpeechRecognitionResult> RecognizeSpeechAsyncFromFile(string fileName)
         {
             await RunOnUIThread(() => MySpeechResponseFromFile.Text = "Recognizing...");
 
-            var result = await recognizeSpeech.RecognizeSpeechAsyncFromFile(SupportedLanguages.Text, fileName);
+            var result = await recognizeSpeech.RecognizeOnceAsyncFromFile(SupportedLanguages.Text, fileName);
 
             HandleResult(result, MySpeechResponseFromFile);
 
@@ -57,7 +57,7 @@ namespace WPF_Application
         {
             await RunOnUIThread(() => MySpeechResponseFromFile.Text = "Recognizing...");
 
-            var result = await recognizeSpeech.RecognizeSpeechFromFileRESTApi(SupportedLanguages.Text, fileName);
+            var result = await recognizeSpeech.RecognizeOnceAsyncFromFileRESTApi(SupportedLanguages.Text, fileName);
 
             return result;
         }
