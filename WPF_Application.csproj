@@ -62,7 +62,8 @@
     <Reference Include="Microsoft.Azure.CognitiveServices.Search.WebSearch, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Azure.CognitiveServices.Search.WebSearch.2.0.0\lib\net452\Microsoft.Azure.CognitiveServices.Search.WebSearch.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Azure.CognitiveServices.Vision.Face">
+    <Reference Include="Microsoft.Azure.CognitiveServices.Vision.Face, Version=2.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Users\jksa\.nuget\packages\microsoft.azure.cognitiveservices.vision.face\2.5.0-preview.1\lib\netstandard2.0\Microsoft.Azure.CognitiveServices.Vision.Face.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CognitiveServices.Speech.csharp, Version=1.8.0.28, Culture=neutral, PublicKeyToken=d2e6dcccb609e663, processorArchitecture=MSIL">
